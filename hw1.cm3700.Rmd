@@ -1,0 +1,85 @@
+---
+title: "STAT5241 HW1"
+output: pdf_document
+---
+
+```{r}
+setwd("~/Desktop/5241/hw")
+```
+
+```{r}
+library(zoo)
+library(xts)
+library(TTR)
+library(quantmod)
+library(plyr)
+```
+#Q3
+part1
+```{r}
+sym = list("MMM","AXP","AAPL","BA","CAT","CVX","CSCO","KO","DWDP","DIS","XOM","GE","GS","GD","HD","IBM","INTC","JNJ","JPM","MCD","MRK","MSFT","NKE","PFE","PG","TRV","UTX","UNH","VZ","V","WMT")
+
+getclose = function(x){
+  price = getSymbols(x,auto.assign = F,from = "2017-01-01", to = "2018-01-01")
+  return(price[,4])
+}
+
+data=do.call(merge.xts,lapply(sym,getclose))
+```
+part2
+```{r}
+pr.out = princomp(data,cor = FALSE)
+
+biplot(pr.out,scale = 0)
+pr.var = pr.out$sdev^2
+pve = pr.var/sum(pr.var)
+
+screeplot(pr.out,npcs = 31,type = "b")
+plot(pve,type = "b",xlab = "Principle Component",ylab = "Proportion of variance explained",ylim = c(0,1))
+plot(cumsum(pve), xlab="Principal Component ", ylab=" Cumulative Proportion of Variance Explained ", ylim=c(0,1), type="b")
+```
+```{r}
+#
+#From the screeplot, only first component is important since it explains 87% of the variance in the data. Second component is relatively important and explains 6.3% of the variance.
+```
+
+
+Part3
+```{r}
+pr.out2 = princomp(data,cor = TRUE)
+
+biplot(pr.out2,scale = 0)
+pr.var2 = pr.out2$sdev^2
+pve2 = pr.var2/sum(pr.var2)
+
+screeplot(pr.out2,npcs = 31,type = "b")
+plot(pve2,type = "b",xlab = "Principle Component",ylab = "Proportion of variance explained",ylim = c(0,1))
+plot(cumsum(pve2), xlab="Principal Component ", ylab=" Cumulative Proportion of Variance Explained ", ylim=c(0,1), type="b")
+```
+```{r}
+#
+#From screeplot, first and second components are important, and explain 63.4% and 14.95% of the variance. Third component is relatively important and counts for 6.1% of the variance. 
+```
+
+part 4
+```{r}
+data.raw= lapply(sym,function(x){
+  dailyReturn(na.omit(getSymbols(x, from = "2017-01-01", to = "2018-01-01",auto.assign = F)))
+}) 
+DailyReturn = do.call(merge.xts,data.raw)
+colnames(DailyReturn) = sym
+dr.out = princomp(DailyReturn,cor = T)
+dr.var = dr.out$sdev^2
+dve = dr.var/sum(dr.var)
+
+biplot(dr.out,scale = 0)
+screeplot(dr.out)
+plot(dve,type = "b",xlab = "Principle Component",ylab = "Proportion of variance explained",ylim = c(0,1))
+plot(cumsum(dve), xlab="Principal Component ", ylab=" Cumulative Proportion of Variance Explained ", ylim=c(0,1), type="b")
+
+```
+
+```{r}
+
+```
+
